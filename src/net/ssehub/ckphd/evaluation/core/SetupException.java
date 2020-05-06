@@ -14,30 +14,37 @@
  */
 package net.ssehub.ckphd.evaluation.core;
 
-import java.io.File;
-
 /**
- * This is just a dummy class for checking the correct configuration of the project.
+ * This class represents the specific type of exception, which will be thrown by any class of this project, if its
+ * internal setup fails, e.g., during the construction of an instance.
  * 
  * @author Christian Kroeher
  *
  */
-public class Main {
+public class SetupException extends Exception {
 
     /**
-     * Prints a message.
-     *  
-     * @param args not used
+     * The serial version UID of this class required by the extended {@link Exception}.
      */
-    public static void main(String[] args) {
-        try {
-            Repository r = new Repository(new File("./data/test/repository.zip"));
-            r.delete();
-        } catch (SetupException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+    private static final long serialVersionUID = 7903863252257700332L;
 
+    /**
+     * Constructs a new {@link SetupException} instance.
+     * 
+     * @param message the description of the problem causing this exception
+     */
+    public SetupException(String message) {
+        super(message);
     }
 
+    /**
+     * Constructs a new {@link SetupException} instance.
+     * 
+     * @param message the description of the problem causing this exception
+     * @param cause the exception causing this exception
+     */
+    public SetupException(String message, Throwable cause) {
+        super(message, cause);
+    }
+    
 }
