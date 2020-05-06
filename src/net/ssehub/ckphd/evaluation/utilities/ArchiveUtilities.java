@@ -132,9 +132,11 @@ public class ArchiveUtilities {
             throws ArchiveUtilitiesException {
         if (zipEntry != null) {
             File zipEntryFile = new File(destinationDirectory, zipEntry.getName());
-            if (zipEntry.isDirectory() && !zipEntryFile.mkdir()) {
-                throw new ArchiveUtilitiesException("Creating the directory \"" + zipEntryFile.getAbsolutePath() 
-                        + "\" for archive entry \"" + zipEntry.getName() + "\" failed");
+            if (zipEntry.isDirectory()) {
+                if (!zipEntryFile.mkdir()) {                    
+                    throw new ArchiveUtilitiesException("Creating the directory \"" + zipEntryFile.getAbsolutePath() 
+                            + "\" for archive entry \"" + zipEntry.getName() + "\" failed");
+                }
             } else {
                 FileOutputStream zipEntryFileOutputStream = null;
                 BufferedOutputStream zipEntryBufferedOutputStream = null;
