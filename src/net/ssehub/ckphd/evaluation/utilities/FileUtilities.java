@@ -103,7 +103,7 @@ public class FileUtilities {
      * 
      * @param file the {@link File} that shall be read
      * @return a {@link List} of {@link String}s representing the line-wise content of the given file
-     * @throws FileUtilitiesException if reading the file fails
+     * @throws FileUtilitiesException if the given file is <code>null</code> or reading the file fails
      */
     public List<String> readFile(File file) throws FileUtilitiesException {
         List<String> fileLines = null;
