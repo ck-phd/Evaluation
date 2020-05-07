@@ -22,6 +22,9 @@ import net.ssehub.ckphd.evaluation.utilities.FileUtilities;
 import net.ssehub.ckphd.evaluation.utilities.FileUtilitiesException;
 import net.ssehub.ckphd.evaluation.utilities.Logger;
 import net.ssehub.ckphd.evaluation.utilities.Logger.MessageType;
+import net.ssehub.ckphd.evaluation.utilities.ProcessUtilities.ExecutionResult;
+import net.ssehub.ckphd.evaluation.utilities.ProcessUtilities;
+import net.ssehub.ckphd.evaluation.utilities.ProcessUtilitiesException;
 
 /**
  * This class represents a software repository.
@@ -52,9 +55,31 @@ public class Repository {
     private static final String GIT_PRE_COMMIT_HOOK_FILE_NAME = "pre-commit";
     
     /**
+     * The constant part of the command for applying a patch to a Git repository. That patch has to be appended to this
+     * command by adding the absolute path to the file that contains the patch information. 
+     */
+    private static final String[] GIT_APPLY_COMMAND_PART = {"git", "apply"};
+    
+    /**
+     * The command for adding all changes (including untracked files) to the next commit to a Git repository.
+     */
+    private static final String[] GIT_ADD_COMMAND = {"git", "apply", "."};
+    
+    /**
+     * The constant part of the command for committing all changes to a Git repository. The commit message has to be
+     * appended to this command by adding a text. 
+     */
+    private static final String[] GIT_COMMIT_COMMAND_PART = {"git", "commit", "-a", "-m"};
+    
+    /**
      * The reference to the global {@link Logger}.
      */
     private Logger logger = Logger.getInstance();
+    
+    /**
+     * The reference to the global {@link ProcessUtilities}.
+     */
+    private ProcessUtilities processUtilities = ProcessUtilities.getInstance();
     
     /**
      * The {@link File} denoting the root directory of the repository this instance represents.
@@ -120,6 +145,69 @@ public class Repository {
                         preCommitHookContent, true);
             } catch (FileUtilitiesException e) {
                 throw new ExecutionException("Adding pre-commit hook failed", e);
+            }
+        }
+    }
+    
+    /**
+     * Applies the changes in the given commit {@link File} to the current state of this repository.
+     * 
+     * @param commitFile the {@link File} denoting a commit file, which contains a patch as created from the respective
+     *        version control system
+     * @throws ExecutionException if the given commit file is not an existing file, the application of its changes, or
+     *         the commit of these changes fails
+     */
+    public void applyCommit(File commitFile) throws ExecutionException {
+        if (commitFile == null) {
+            throw new ExecutionException("The given commit file is \"null\"");
+        } else if (!commitFile.exists()) {
+            throw new ExecutionException("The given commit file \"" + commitFile.getAbsolutePath()
+                    + "\" does not exist");
+        } else if (!commitFile.isFile()) {
+            throw new ExecutionException("The given commit file \"" + commitFile.getAbsolutePath()
+                    + "\" is not a file");
+        } else {
+            String[] command;
+            ExecutionResult commandResult;
+            // First, apply the changes in the commit file to the files in the repository
+            command = processUtilities.extendCommand(GIT_APPLY_COMMAND_PART, commitFile.getAbsolutePath());
+            logger.log(ID, "Applying changes from \"" + commitFile.getAbsolutePath() + "\"",
+                    "Command: " + processUtilities.getCommandString(command), MessageType.INFO);
+            try {
+                commandResult = processUtilities.executeCommand(command, repositoryDirectory);
+                if (!commandResult.executionSuccessful()) {
+                    throw new ExecutionException("Applying changes from \"" + commitFile.getAbsolutePath()
+                            + "\" failed: " + commandResult.getErrorOutputData());
+                }
+            } catch (ProcessUtilitiesException e) {
+                throw new ExecutionException("Applying changes from \"" + commitFile.getAbsolutePath() + "\" failed",
+                        e);
+            }
+            // Second, add the changes to the next commit
+            command = GIT_ADD_COMMAND;
+            logger.log(ID, "Adding changes to next commit", "Command: " + processUtilities.getCommandString(command),
+                    MessageType.INFO);
+            try {
+                commandResult = processUtilities.executeCommand(command, repositoryDirectory);
+                if (!commandResult.executionSuccessful()) {
+                    throw new ExecutionException("Adding changes to next commit failed: "
+                            + commandResult.getErrorOutputData());
+                }
+            } catch (ProcessUtilitiesException e) {
+                throw new ExecutionException("Adding changes to next commit failed", e);
+            }
+            // Third, commit the changes to the repository
+            command = processUtilities.extendCommand(GIT_COMMIT_COMMAND_PART, commitFile.getName());
+            logger.log(ID, "Committing changes to repository", "Command: " + processUtilities.getCommandString(command),
+                    MessageType.INFO);
+            try {
+                commandResult = processUtilities.executeCommand(command, repositoryDirectory);
+                if (!commandResult.executionSuccessful()) {
+                    throw new ExecutionException("Committing changes to repository failed: "
+                            + commandResult.getErrorOutputData());
+                }
+            } catch (ProcessUtilitiesException e) {
+                throw new ExecutionException("Committing changes to repository", e);
             }
         }
     }
