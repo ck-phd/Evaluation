@@ -25,20 +25,20 @@ import java.io.File;
 public class Main {
 
     /**
-     * Prints a message.
+     * Runs an {@link Evaluation} for initial testing.
      *  
      * @param args not used
      */
     public static void main(String[] args) {
+        File repositoryArchiveFile = new File("./data/test/repository.zip");
+        File commitSequenceDirectory = new File("./data/test/commit-sequence_1");
+        String hookActions = "git diff --cached -U100000 --no-renames > C:/Users/kroeher/Desktop/temp.txt";
         try {
-            Repository r = new Repository(new File("./data/test/repository.zip"));
-            r.addHook("ECHO Thats my hook!!!");
-            r.delete();
+            Evaluation e = new Evaluation(repositoryArchiveFile, commitSequenceDirectory);
+            e.run(hookActions);
         } catch (SetupException | ExecutionException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
     }
 
 }
