@@ -98,6 +98,9 @@ public class Evaluation {
             commitFile = commitCommitFileMap.get(commitSequenceList.get(i));
             repository.applyCommit(commitFile);
         }
+        if (!repository.delete()) {
+            throw new ExecutionException("Deleting the repository failed");
+        }
     }
     
     /**
