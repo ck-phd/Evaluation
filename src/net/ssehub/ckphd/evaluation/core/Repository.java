@@ -107,7 +107,7 @@ public class Repository {
                 FileUtilities.getInstance().writeFile(preCommitHookFilePath, GIT_PRE_COMMIT_HOOK_FILE_NAME,
                         preCommitHookContent, true);
             } catch (FileUtilitiesException e) {
-                throw new SetupException("Adding pre commit hook failed", e);
+                throw new SetupException("Adding pre-commit hook failed", e);
             }
         }
     }
