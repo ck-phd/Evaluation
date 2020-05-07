@@ -63,7 +63,7 @@ public class Repository {
     /**
      * The command for adding all changes (including untracked files) to the next commit to a Git repository.
      */
-    private static final String[] GIT_ADD_COMMAND = {"git", "apply", "."};
+    private static final String[] GIT_ADD_COMMAND = {"git", "add", "."};
     
     /**
      * The constant part of the command for committing all changes to a Git repository. The commit message has to be
