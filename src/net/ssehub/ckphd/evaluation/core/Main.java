@@ -31,7 +31,7 @@ public class Main {
      */
     public static void main(String[] args) {
         try {
-            Repository r = new Repository(new File("./data/test/repository.zip"));
+            Repository r = new Repository(new File("./data/test/repository.zip"), "ECHO Thats my hook!!!");
             r.delete();
         } catch (SetupException e) {
             // TODO Auto-generated catch block
