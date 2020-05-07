@@ -106,37 +106,42 @@ public class FileUtilities {
      * @throws FileUtilitiesException if reading the file fails
      */
     public List<String> readFile(File file) throws FileUtilitiesException {
-        logger.log(ID, "Reading file \"" + file.getAbsolutePath() + "\"", null, MessageType.DEBUG);
         List<String> fileLines = null;
-        FileReader fileReader = null;
-        BufferedReader bufferedReader = null;       
-        try {
-            fileLines = new ArrayList<String>();
-            fileReader = new FileReader(file);
-            bufferedReader = new BufferedReader(fileReader);
-            String fileLine;
-            while ((fileLine = bufferedReader.readLine()) != null) {
-                fileLines.add(fileLine);
-            }
-        } catch (IOException | OutOfMemoryError e) {
-            throw new FileUtilitiesException("Reading content from file \"" + file.getAbsolutePath() + "\" failed", e);
-        } finally {
-            if (fileReader != null) {
-                try {
-                    fileReader.close();
-                } catch (IOException e) {
-                    throw new FileUtilitiesException("Closing file reader for \"" + file.getAbsolutePath()
-                            + "\" failed", e);
+        if (file != null) {            
+            logger.log(ID, "Reading file \"" + file.getAbsolutePath() + "\"", null, MessageType.DEBUG);
+            FileReader fileReader = null;
+            BufferedReader bufferedReader = null;       
+            try {
+                fileLines = new ArrayList<String>();
+                fileReader = new FileReader(file);
+                bufferedReader = new BufferedReader(fileReader);
+                String fileLine;
+                while ((fileLine = bufferedReader.readLine()) != null) {
+                    fileLines.add(fileLine);
+                }
+            } catch (IOException | OutOfMemoryError e) {
+                throw new FileUtilitiesException("Reading content from file \"" + file.getAbsolutePath() + "\" failed",
+                        e);
+            } finally {
+                if (fileReader != null) {
+                    try {
+                        fileReader.close();
+                    } catch (IOException e) {
+                        throw new FileUtilitiesException("Closing file reader for \"" + file.getAbsolutePath()
+                        + "\" failed", e);
+                    }
+                }
+                if (bufferedReader != null) {
+                    try {
+                        bufferedReader.close();
+                    } catch (IOException e) {
+                        throw new FileUtilitiesException("Closing buffered reader for \"" + file.getAbsolutePath()
+                        + "\" failed", e);
+                    }
                 }
             }
-            if (bufferedReader != null) {
-                try {
-                    bufferedReader.close();
-                } catch (IOException e) {
-                    throw new FileUtilitiesException("Closing buffered reader for \"" + file.getAbsolutePath()
-                            + "\" failed", e);
-                }
-            }
+        } else {
+            throw new FileUtilitiesException("The given file to read is \"null\"");
         }
         return fileLines;
     }
