@@ -60,30 +60,26 @@ public class Repository {
      * The {@link File} denoting the root directory of the repository this instance represents.
      */
     private File repositoryDirectory;
-
+    
     /**
      * Constructs a new {@link Repository} instance.
      * 
      * @param archiveFile the {@link File} denoting an archive in which the actual repository is stored
-     * @param preCommitHookActions the {@link String} defining the actions to be performed as part of the pre-commit
-     *        hook this method will add to the repository
      * @throws SetupException if {@link #setup(File)} fails
      */
-    public Repository(File archiveFile, String preCommitHookActions) throws SetupException {
-        setup(archiveFile, preCommitHookActions);
+    public Repository(File archiveFile) throws SetupException {
+        setup(archiveFile);
     }
     
     /**
-     * Sets up this instance by extracting the given archive file and setting the {@link #repositoryDirectory} as the
-     * extracted root element of that archive.
+     * Sets up this instance by extracting the given archive file and setting the extracted root element of that archive
+     * as the {@link #repositoryDirectory}.
      * 
      * @param archiveFile the {@link File} denoting an archive in which the actual repository is stored
-     * @param preCommitHookActions the {@link String} defining the actions to be performed as part of the pre-commit
-     *        hook this method will add to the repository
      * @throws SetupException if the given archive file is not a zip file or its extraction fails
-     *         ({@link #repositoryDirectory} will not be set) or adding the pre-commit hook fails
+     *         ({@link #repositoryDirectory} will not be set)
      */
-    private void setup(File archiveFile, String preCommitHookActions) throws SetupException {
+    private void setup(File archiveFile) throws SetupException {
         if (archiveFile == null) {
             throw new SetupException("The given archive file is \"null\"");
         } else if (!archiveFile.exists()) {
@@ -100,14 +96,30 @@ public class Repository {
             } catch (ArchiveUtilitiesException e) {
                 throw new SetupException("Extracting archive file \"" + archiveFile.getAbsolutePath() + "\" failed", e);
             }
-            // Add the pre-commit hook with the desired actions
+        }
+    }
+    
+    /**
+     * Adds a hook to the repository this instance represents. The content of that hook will be constructed by the 
+     * {@link #SHEBANG} followed by the content of the given {@link String}.
+     * 
+     * @param hookActions the {@link String} defining the actions to be performed as part of the hook this method will
+     *        add to this repository; may be <i>blank</i>
+     * @throws ExecutionException if the given hook actions are <code>null</code> or adding the hook fails 
+     */
+    public void addHook(String hookActions) throws ExecutionException {
+        if (hookActions == null) {
+            throw new ExecutionException("The given hook actions are \"null\"");
+        } else {            
             String preCommitHookFilePath = repositoryDirectory.getAbsolutePath() + GIT_HOOKS_DIRECTORY_RELATIVE_PATH;
-            String preCommitHookContent = SHEBANG + System.lineSeparator() + preCommitHookActions;
+            String preCommitHookContent = SHEBANG + System.lineSeparator() + hookActions;
+            logger.log(ID, "Adding pre-commmit hook \"" + preCommitHookFilePath + "\"", "Content:"
+                    + System.lineSeparator() + preCommitHookContent, MessageType.INFO);
             try {
                 FileUtilities.getInstance().writeFile(preCommitHookFilePath, GIT_PRE_COMMIT_HOOK_FILE_NAME,
                         preCommitHookContent, true);
             } catch (FileUtilitiesException e) {
-                throw new SetupException("Adding pre-commit hook failed", e);
+                throw new ExecutionException("Adding pre-commit hook failed", e);
             }
         }
     }
