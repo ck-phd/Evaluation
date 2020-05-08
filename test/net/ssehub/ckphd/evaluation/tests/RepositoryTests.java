@@ -197,9 +197,7 @@ public class RepositoryTests {
             assertNull(e, "SetupException should be \"null\", but was \"" + e.getMessage() + "\"");
         } catch (ExecutionException e) {
             assertNotNull(e, "ExecutionException expected");
-            // TODO
-            assertEquals("",
-                    e.getMessage(), "Wrong exception message");
+            assertEquals("The given hook actions are \"null\"", e.getMessage(), "Wrong exception message");
         } finally {            
             // Ensure to delete the extracted archive files again
             assertTrue(AllTests.delete(expectedExtractedRepositoryDirectory),
@@ -227,9 +225,7 @@ public class RepositoryTests {
             assertNull(e, "SetupException should be \"null\", but was \"" + e.getMessage() + "\"");
         } catch (ExecutionException e) {
             assertNotNull(e, "ExecutionException expected");
-            // TODO
-            assertEquals("",
-                    e.getMessage(), "Wrong exception message");
+            assertEquals("The given hook actions are empty", e.getMessage(), "Wrong exception message");
         } finally {            
             // Ensure to delete the extracted archive files again
             assertTrue(AllTests.delete(expectedExtractedRepositoryDirectory),
@@ -257,9 +253,7 @@ public class RepositoryTests {
             assertNull(e, "SetupException should be \"null\", but was \"" + e.getMessage() + "\"");
         } catch (ExecutionException e) {
             assertNotNull(e, "ExecutionException expected");
-            // TODO
-            assertEquals("",
-                    e.getMessage(), "Wrong exception message");
+            assertEquals("The given hook actions are empty", e.getMessage(), "Wrong exception message");
         } finally {            
             // Ensure to delete the extracted archive files again
             assertTrue(AllTests.delete(expectedExtractedRepositoryDirectory),
