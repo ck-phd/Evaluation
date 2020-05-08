@@ -22,8 +22,8 @@ import net.ssehub.ckphd.evaluation.utilities.FileUtilities;
 import net.ssehub.ckphd.evaluation.utilities.FileUtilitiesException;
 import net.ssehub.ckphd.evaluation.utilities.Logger;
 import net.ssehub.ckphd.evaluation.utilities.Logger.MessageType;
-import net.ssehub.ckphd.evaluation.utilities.ProcessUtilities.ExecutionResult;
 import net.ssehub.ckphd.evaluation.utilities.ProcessUtilities;
+import net.ssehub.ckphd.evaluation.utilities.ProcessUtilities.ExecutionResult;
 import net.ssehub.ckphd.evaluation.utilities.ProcessUtilitiesException;
 
 /**
@@ -87,7 +87,8 @@ public class Repository {
     private File repositoryDirectory;
     
     /**
-     * Constructs a new {@link Repository} instance.
+     * Constructs a new {@link Repository} instance. As part of that construction, the repository in the given archive
+     * file will be extracted to the same location (directory) as that file.
      * 
      * @param archiveFile the {@link File} denoting an archive in which the actual repository is stored
      * @throws SetupException if {@link #setup(File)} fails
