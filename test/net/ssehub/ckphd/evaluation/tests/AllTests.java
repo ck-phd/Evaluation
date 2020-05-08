@@ -52,15 +52,17 @@ public class AllTests {
      */
     public static boolean delete(File file) {
         boolean deletionSuccessful = true;
-        if (file.isDirectory()) {
-            File[] nestedFiles = file.listFiles();
-            int nestedFilesCounter = 0;
-            while (deletionSuccessful && nestedFilesCounter < nestedFiles.length) {
-                deletionSuccessful = delete(nestedFiles[nestedFilesCounter]);
-                nestedFilesCounter++;
+        if (file.exists()) {            
+            if (file.isDirectory()) {
+                File[] nestedFiles = file.listFiles();
+                int nestedFilesCounter = 0;
+                while (deletionSuccessful && nestedFilesCounter < nestedFiles.length) {
+                    deletionSuccessful = delete(nestedFiles[nestedFilesCounter]);
+                    nestedFilesCounter++;
+                }
             }
+            deletionSuccessful = file.delete();
         }
-        deletionSuccessful = file.delete();
         return deletionSuccessful;
     }
     

@@ -1,0 +1,9 @@
+commit 2a79fe77210128198ae05d3731b8693c75fb75e0
+Author: Christian Kroeher <kroeher@sse.uni-hildesheim.de>
+Date:   Fri Mar 13 12:01:38 2020 +0100
+
+    Addition of empty text file on master-branch
+
+diff --git a/EmptyTextFile.txt b/EmptyTextFile.txt
+new file mode 100644
+index e69de29..ebcfc9c
