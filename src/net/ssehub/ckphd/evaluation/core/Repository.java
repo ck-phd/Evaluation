@@ -131,12 +131,15 @@ public class Repository {
      * 
      * @param hookActions the {@link String} defining the actions to be performed as part of the hook this method will
      *        add to this repository; may be <i>blank</i>
-     * @throws ExecutionException if the given hook actions are <code>null</code> or adding the hook fails 
+     * @throws ExecutionException if the given hook actions are <code>null</code>, <i>blank</i>, or adding the hook
+     *         fails 
      */
     public void addHook(String hookActions) throws ExecutionException {
         if (hookActions == null) {
             throw new ExecutionException("The given hook actions are \"null\"");
-        } else {            
+        } else if (hookActions.isBlank()) {
+            throw new ExecutionException("The given hook actions are empty");
+        } else {
             String preCommitHookFilePath = repositoryDirectory.getAbsolutePath() + GIT_HOOKS_DIRECTORY_RELATIVE_PATH;
             String preCommitHookContent = SHEBANG + System.lineSeparator() + hookActions;
             logger.log(ID, "Adding pre-commmit hook \"" + preCommitHookFilePath + "\"", "Content:"
