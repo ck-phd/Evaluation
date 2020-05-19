@@ -1,0 +1,14 @@
+commit 2a79fe77210128198ae05d3731b8693c75fb75e0
+Author: Christian Kroeher <kroeher@sse.uni-hildesheim.de>
+Date:   Fri Mar 13 12:01:38 2020 +0100
+
+    Addition of single line on master-branch
+
+diff --git a/TextFile.txt b/TextFile.txt
+index e69de29..ebcfc9c 100644
+--- a/TextFile.txt
++++ b/TextFile.txt
+@@ -0,0 +1,2 @@
++
++Addition of single line.
+\ No newline at end of file
