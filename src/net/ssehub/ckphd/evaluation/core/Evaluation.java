@@ -204,6 +204,7 @@ public class Evaluation {
                 if (files[filesCounter].getName().equals(commit)) {
                     commitFile = files[filesCounter];
                 }
+                filesCounter++;
             }
         }
         return commitFile;
