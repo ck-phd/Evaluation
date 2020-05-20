@@ -14,7 +14,9 @@
  */
 package net.ssehub.ckphd.evaluation.tests;
 
+import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,6 +27,7 @@ import java.util.List;
 import org.junit.Test;
 
 import net.ssehub.ckphd.evaluation.core.Evaluation;
+import net.ssehub.ckphd.evaluation.core.ExecutionException;
 import net.ssehub.ckphd.evaluation.core.SetupException;
 import net.ssehub.ckphd.evaluation.utilities.FileUtilities;
 import net.ssehub.ckphd.evaluation.utilities.FileUtilitiesException;
@@ -39,9 +42,6 @@ public class EvaluationTests {
 
     /*
      * TODO Implement the following tests:
-     * 
-     * Execution tests with: run(String hookActions)
-     * Where the different combination of hook actions (as in RepositoryTests) should be tested
      * 
      * Further, we need something like a "ScenarioTest", where a full sequence of commits is applied iteratively and
      * the hook actions enable the tests to check, whether the correct commit in the correct order are applied.
@@ -380,6 +380,144 @@ public class EvaluationTests {
             assertNotNull(evaluation, "Evaluation instance expected");            
         } catch (SetupException e) {
             assertNull(e, "SetupException should be \"null\", but was \"" + e.getMessage() + "\"");
+        } finally {            
+            // Ensure to delete the extracted archive files again
+            assertTrue(AllTests.delete(expectedExtractedRepositoryDirectory),
+                    "Deleting the extracted archive files failed");
+        }
+    }
+    
+    /**
+     * Tests whether {@link Evaluation#run(String)} throws an exception, if <code>null</code> is given as a parameter.
+     */
+    @Test
+    public void testNullHookRun() {
+        File archiveFile = new File(AllTests.TEST_DATA_DIRECTORY, "repository.zip");
+        File expectedExtractedRepositoryDirectory = new File(archiveFile.getParentFile(),
+                TEST_REPOSITORY_DIRECTORY_NAME);
+        File commitSequenceDirectory = new File(AllTests.TEST_DATA_DIRECTORY, "test_commit-sequence_valid");
+        try {
+            assertFalse(expectedExtractedRepositoryDirectory.exists(), "No repository directory expected");
+            Evaluation evaluation = new Evaluation(archiveFile, commitSequenceDirectory);
+            assertTrue(expectedExtractedRepositoryDirectory.exists(), "Repository directory expected");
+            evaluation.run(null);
+            fail("ExecutionException expected");
+        } catch (SetupException e) {
+            assertNull(e, "SetupException should be \"null\", but was \"" + e.getMessage() + "\"");
+        } catch (ExecutionException e) {
+            assertNotNull(e, "ExecutionException expected");
+            assertEquals("The given hook actions are \"null\"", e.getMessage(), "Wrong exception message");
+        } finally {            
+            // Ensure to delete the extracted archive files again
+            assertTrue(AllTests.delete(expectedExtractedRepositoryDirectory),
+                    "Deleting the extracted archive files failed");
+        }
+    }
+    
+    /**
+     * Tests whether {@link Evaluation#run(String)} throws an exception, if an empty string is given as a parameter.
+     */
+    @Test
+    public void testEmptyHookRun() {
+        File archiveFile = new File(AllTests.TEST_DATA_DIRECTORY, "repository.zip");
+        File expectedExtractedRepositoryDirectory = new File(archiveFile.getParentFile(),
+                TEST_REPOSITORY_DIRECTORY_NAME);
+        File commitSequenceDirectory = new File(AllTests.TEST_DATA_DIRECTORY, "test_commit-sequence_valid");
+        try {
+            assertFalse(expectedExtractedRepositoryDirectory.exists(), "No repository directory expected");
+            Evaluation evaluation = new Evaluation(archiveFile, commitSequenceDirectory);
+            assertTrue(expectedExtractedRepositoryDirectory.exists(), "Repository directory expected");
+            evaluation.run("");
+            fail("ExecutionException expected");
+        } catch (SetupException e) {
+            assertNull(e, "SetupException should be \"null\", but was \"" + e.getMessage() + "\"");
+        } catch (ExecutionException e) {
+            assertNotNull(e, "ExecutionException expected");
+            assertEquals("The given hook actions are empty", e.getMessage(), "Wrong exception message");
+        } finally {            
+            // Ensure to delete the extracted archive files again
+            assertTrue(AllTests.delete(expectedExtractedRepositoryDirectory),
+                    "Deleting the extracted archive files failed");
+        }
+    }
+    
+    /**
+     * Tests whether {@link Evaluation#run(String)} throws an exception, if a blank string is given as a parameter.
+     */
+    @Test
+    public void testBlankHookRun() {
+        File archiveFile = new File(AllTests.TEST_DATA_DIRECTORY, "repository.zip");
+        File expectedExtractedRepositoryDirectory = new File(archiveFile.getParentFile(),
+                TEST_REPOSITORY_DIRECTORY_NAME);
+        File commitSequenceDirectory = new File(AllTests.TEST_DATA_DIRECTORY, "test_commit-sequence_valid");
+        try {
+            assertFalse(expectedExtractedRepositoryDirectory.exists(), "No repository directory expected");
+            Evaluation evaluation = new Evaluation(archiveFile, commitSequenceDirectory);
+            assertTrue(expectedExtractedRepositoryDirectory.exists(), "Repository directory expected");
+            evaluation.run("    ");
+            fail("ExecutionException expected");
+        } catch (SetupException e) {
+            assertNull(e, "SetupException should be \"null\", but was \"" + e.getMessage() + "\"");
+        } catch (ExecutionException e) {
+            assertNotNull(e, "ExecutionException expected");
+            assertEquals("The given hook actions are empty", e.getMessage(), "Wrong exception message");
+        } finally {            
+            // Ensure to delete the extracted archive files again
+            assertTrue(AllTests.delete(expectedExtractedRepositoryDirectory),
+                    "Deleting the extracted archive files failed");
+        }
+    }
+    
+    /**
+     * Tests whether {@link Evaluation#run(String)} throws an exception, if a string denoting an invalid bash script
+     * command is given as a parameter.
+     */
+    @Test
+    public void testInvalidHookRun() {
+        File archiveFile = new File(AllTests.TEST_DATA_DIRECTORY, "repository.zip");
+        File expectedExtractedRepositoryDirectory = new File(archiveFile.getParentFile(),
+                TEST_REPOSITORY_DIRECTORY_NAME);
+        File commitSequenceDirectory = new File(AllTests.TEST_DATA_DIRECTORY, "test_commit-sequence_valid");
+        String hookContent = "abc";
+        try {
+            assertFalse(expectedExtractedRepositoryDirectory.exists(), "No repository directory expected");
+            Evaluation evaluation = new Evaluation(archiveFile, commitSequenceDirectory);
+            assertTrue(expectedExtractedRepositoryDirectory.exists(), "Repository directory expected");
+            evaluation.run(hookContent);
+            fail("ExecutionException expected");
+        } catch (SetupException e) {
+            assertNull(e, "SetupException should be \"null\", but was \"" + e.getMessage() + "\"");
+        } catch (ExecutionException e) {
+            assertNotNull(e, "ExecutionException expected");
+            assertEquals("Committing changes to repository failed: .git/hooks/pre-commit: line 2: " + hookContent 
+                    + ": command not found" + System.lineSeparator(), e.getMessage(), "Wrong exception message");
+        } finally {            
+            // Ensure to delete the extracted archive files again
+            assertTrue(AllTests.delete(expectedExtractedRepositoryDirectory),
+                    "Deleting the extracted archive files failed");
+        }
+    }
+    
+    /**
+     * Tests whether {@link Evaluation#run(String)} is executed successfully (no errors or exceptions), if a valid bash
+     * script command is given as a parameter.
+     */
+    @Test
+    public void testValidHookRun() {
+        File archiveFile = new File(AllTests.TEST_DATA_DIRECTORY, "repository.zip");
+        File expectedExtractedRepositoryDirectory = new File(archiveFile.getParentFile(),
+                TEST_REPOSITORY_DIRECTORY_NAME);
+        File commitSequenceDirectory = new File(AllTests.TEST_DATA_DIRECTORY, "test_commit-sequence_valid");
+        String hookContent = "exit 0";
+        try {
+            Evaluation evaluation = new Evaluation(archiveFile, commitSequenceDirectory);
+            assertTrue(expectedExtractedRepositoryDirectory.exists(), "Repository directory expected");
+            evaluation.run(hookContent);
+            assertFalse(expectedExtractedRepositoryDirectory.exists(), "No repository directory expected");
+        } catch (SetupException e) {
+            assertNull(e, "SetupException should be \"null\", but was \"" + e.getMessage() + "\"");
+        } catch (ExecutionException e) {
+            assertNull(e, "ExecutionException should be \"null\", but was \"" + e.getMessage() + "\"");
         } finally {            
             // Ensure to delete the extracted archive files again
             assertTrue(AllTests.delete(expectedExtractedRepositoryDirectory),
