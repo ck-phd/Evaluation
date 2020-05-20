@@ -26,7 +26,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
     RepositoryTests.class,
-    EvaluationTests.class
+    EvaluationTests.class,
+    ScenarioSingleCommitTests.class
     })
 
 /**
