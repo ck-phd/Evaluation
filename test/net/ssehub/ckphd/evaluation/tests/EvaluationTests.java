@@ -39,13 +39,6 @@ import net.ssehub.ckphd.evaluation.utilities.FileUtilitiesException;
  *
  */
 public class EvaluationTests {
-
-    /*
-     * TODO Implement the following tests:
-     * 
-     * Further, we need something like a "ScenarioTest", where a full sequence of commits is applied iteratively and
-     * the hook actions enable the tests to check, whether the correct commit in the correct order are applied.
-     */
     
     /**
      * The {@link String} denoting the name of the root directory of the extracted repository.

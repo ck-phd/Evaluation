@@ -28,7 +28,8 @@ import net.ssehub.ckphd.evaluation.utilities.FileUtilities;
 import net.ssehub.ckphd.evaluation.utilities.FileUtilitiesException;
 
 /**
- * TODO .
+ * This class contains unit tests that check the behavior of the entire tool, if a commit sequence with a single commit
+ * is applied.
  * 
  * @author Christian Kroeher
  *
