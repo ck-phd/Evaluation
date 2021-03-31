@@ -25,6 +25,7 @@ import net.ssehub.ckphd.evaluation.utilities.Logger.MessageType;
 import net.ssehub.ckphd.evaluation.utilities.ProcessUtilities;
 import net.ssehub.ckphd.evaluation.utilities.ProcessUtilities.ExecutionResult;
 import net.ssehub.ckphd.evaluation.utilities.ProcessUtilitiesException;
+import net.ssehub.ckphd.evaluation.utilities.FileUtilities.WriteOption;
 
 /**
  * This class represents a software repository.
@@ -146,7 +147,7 @@ public class Repository {
                     + System.lineSeparator() + preCommitHookContent, MessageType.INFO);
             try {
                 FileUtilities.getInstance().writeFile(preCommitHookFilePath, GIT_PRE_COMMIT_HOOK_FILE_NAME,
-                        preCommitHookContent, true);
+                        preCommitHookContent, WriteOption.CREATE);
             } catch (FileUtilitiesException e) {
                 throw new ExecutionException("Adding pre-commit hook failed", e);
             }
