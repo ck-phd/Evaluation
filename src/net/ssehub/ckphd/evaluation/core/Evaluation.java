@@ -21,7 +21,6 @@ import java.util.List;
 import net.ssehub.ckphd.evaluation.utilities.FileUtilities;
 import net.ssehub.ckphd.evaluation.utilities.FileUtilitiesException;
 import net.ssehub.ckphd.evaluation.utilities.Logger;
-import net.ssehub.ckphd.evaluation.utilities.Logger.MessageType;
 
 /**
  * This class executes the actual evaluation.
@@ -44,7 +43,7 @@ public class Evaluation {
     /**
      * The reference to the global {@link Logger}.
      */
-    private Logger logger = Logger.getInstance();
+    private Logger logger = Logger.INSTANCE;
     
     /**
      * The reference to the global {@link FileUtilities}.
@@ -129,8 +128,9 @@ public class Evaluation {
             throw new SetupException("The commit sequence directory \"" + commitSequenceDirectory.getAbsolutePath()
                     + "\" is empty");
         } else {
-            logger.log(ID, "Setting up the evaluation", "Commit sequence directory: \""
-                    + commitSequenceDirectory.getAbsolutePath() + "\"", MessageType.INFO);
+            logger.logDebug(ID, "Setting up evaluation",
+                    "Repository archive file: \"" + repositoryArchiveFile.getAbsolutePath() + "\"",
+                    "Commit sequence directory: \"" + commitSequenceDirectory.getAbsolutePath() + "\"");
             // Set the commit sequence to use for this evaluation
             File commitSequenceFile = getCommitSequenceFile(commitSequenceDirectory.listFiles());
             try {

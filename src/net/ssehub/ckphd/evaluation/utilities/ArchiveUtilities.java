@@ -23,8 +23,6 @@ import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import net.ssehub.ckphd.evaluation.utilities.Logger.MessageType;
-
 /**
  * This class provides utility methods for extracting the content of archive files to a specific location.
  * 
@@ -46,7 +44,7 @@ public class ArchiveUtilities {
     /**
      * The reference to the global {@link Logger}.
      */
-    private Logger logger = Logger.getInstance();
+    private Logger logger = Logger.INSTANCE;
     
     /**
      * Constructs a new {@link ArchiveUtilities} instance.
@@ -84,8 +82,7 @@ public class ArchiveUtilities {
             zipInputStream = new ZipInputStream(fileInputStream);
             ZipEntry rootZipEntry = zipInputStream.getNextEntry(); // Used for the return value of this method
             ZipEntry zipEntry = rootZipEntry;
-            logger.log(ID, "Extracting entries from archive file \"" + archiveFile.getAbsolutePath() + "\"", "",
-                    MessageType.INFO);
+            logger.logDebug(ID, "Extracting entries from archive file \"" + archiveFile.getAbsolutePath() + "\"");
             do {
                 extract(zipEntry, zipInputStream, archiveFile.getParentFile());
                 zipEntry = zipInputStream.getNextEntry();

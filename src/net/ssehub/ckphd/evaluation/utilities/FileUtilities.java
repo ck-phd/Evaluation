@@ -24,8 +24,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.ssehub.ckphd.evaluation.utilities.Logger.MessageType;
-
 /**
  * This class provides utility methods for reading and writing files.
  * 
@@ -63,7 +61,7 @@ public class FileUtilities {
     /**
      * The reference to the global {@link Logger}.
      */
-    private Logger logger = Logger.getInstance();
+    private Logger logger = Logger.INSTANCE;
     
     /**
      * Constructs new {@link FileUtilities} instance.
@@ -95,6 +93,8 @@ public class FileUtilities {
      */
     public void writeFile(String path, String fileName, String fileContent, WriteOption writeOption)
             throws FileUtilitiesException {
+        logger.logDebug(ID, "Writing file", "Path: \"" + path + "\"", "Name: \"" + fileName + "\"", "Option: "
+                + writeOption.name());
         File file = createFileObject(path, fileName);
         switch(writeOption) {
         case CREATE:
@@ -121,6 +121,7 @@ public class FileUtilities {
      * @throws FileUtilitiesException if the file already exists or writing the file content fails
      */
     private void writeFile(File file, String fileContent) throws FileUtilitiesException {
+        logger.logDebug(ID, "Creating and writing new file", "File: \"" + file.getAbsolutePath() + "\"");
         if (file.exists()) {
             throw new FileUtilitiesException("Creating new file \"" + file.getAbsolutePath()
                     + "\" denied as the file already exists");
@@ -155,6 +156,7 @@ public class FileUtilities {
      * @throws FileUtilitiesException if the file does not exist or writing the new file content fails
      */
     private void overwriteFile(File file, String fileContent) throws FileUtilitiesException {
+        logger.logDebug(ID, "Overwriting existing file", "File: \"" + file.getAbsolutePath() + "\"");
         if (!file.exists()) {
             throw new FileUtilitiesException("Overwriting file \"" + file.getAbsolutePath()
                     + "\" impossible as the file does not exist");
@@ -176,6 +178,7 @@ public class FileUtilities {
      * @throws FileUtilitiesException if the file does not exist or writing the new file content fails
      */
     private void appendFile(File file, String fileContent) throws FileUtilitiesException {
+        logger.logDebug(ID, "Appending content to existing file", "File: \"" + file.getAbsolutePath() + "\"");
         if (!file.exists()) {
             throw new FileUtilitiesException("Appending file \"" + file.getAbsolutePath()
                     + "\" impossible as the file does not exist");
@@ -199,8 +202,8 @@ public class FileUtilities {
      */
     public List<String> readFile(File file) throws FileUtilitiesException {
         List<String> fileLines = null;
-        if (file != null) {            
-            logger.log(ID, "Reading file \"" + file.getAbsolutePath() + "\"", null, MessageType.DEBUG);
+        if (file != null) {
+            logger.logDebug(ID, "Reading file \"" + file.getAbsolutePath() + "\"");
             FileReader fileReader = null;
             BufferedReader bufferedReader = null;       
             try {
@@ -247,8 +250,6 @@ public class FileUtilities {
      * @throws FileUtilitiesException if the given path or file name is empty
      */
     private File createFileObject(String path, String fileName) throws FileUtilitiesException {
-        logger.log(ID, "Creating file", "Path: " + path + System.lineSeparator() + "File name: " + fileName,
-                MessageType.DEBUG);
         File file = null;
         if (path != null && !path.isEmpty()) {
             if (fileName != null && !fileName.isEmpty()) {

@@ -17,7 +17,6 @@ package net.ssehub.ckphd.evaluation.core;
 import java.io.File;
 
 import net.ssehub.ckphd.evaluation.utilities.Logger;
-import net.ssehub.ckphd.evaluation.utilities.Logger.MessageType;
 
 /**
  * This is the main class of this project and responsible for executing any {@link Evaluation}.
@@ -43,7 +42,7 @@ public class Executor {
     /**
      * The reference to the global {@link Logger}.
      */
-    private static Logger logger = Logger.getInstance();
+    private static Logger logger = Logger.INSTANCE;
 
     /**
      * Starts the overall process of this project.
@@ -55,29 +54,27 @@ public class Executor {
         if (args.length == 3) {
             File repositoryArchiveFile = new File(args[0]);
             File commitSequenceDirectory = new File(args[1]);
-            logger.log(ID, "Start", "Repository archive file: \"" + repositoryArchiveFile.getAbsolutePath() + "\""
-                    + System.lineSeparator() + "Commit sequence directory: \""
-                        + commitSequenceDirectory.getAbsolutePath() + "\""
-                    + System.lineSeparator() + "Commit hook actions: \"" + args[2] + "\"", MessageType.INFO);
+            logger.logInfo(ID, "Start execution",
+                    "Repository archive file: \"" + repositoryArchiveFile.getAbsolutePath() + "\"",
+                    "Commit sequence directory: \"" + commitSequenceDirectory.getAbsolutePath() + "\"",
+                    "Commit hook actions: \"" + args[2] + "\"");
             // Determine and save the current time in milliseconds for calculating the execution duration below 
             long startTimeMillis = System.currentTimeMillis();
             try {
                 Evaluation evaluation = new Evaluation(repositoryArchiveFile, commitSequenceDirectory);
                 evaluation.run(args[2]);
-            } catch (SetupException e) {
-                logger.logException(ID, "An exception occurred during setup", e);
-            } catch (ExecutionException e) {
-                logger.logException(ID, "An exception occurred during execution", e);
+            } catch (SetupException | ExecutionException e) {
+                logger.logException(ID, e);
             } finally {
                 // Determine end date and time and display them along with the duration of the overall process execution
                 long durationMillis = System.currentTimeMillis() - startTimeMillis;
                 int durationSeconds = (int) ((durationMillis / 1000) % 60);
                 int durationMinutes = (int) ((durationMillis / 1000) / 60);
-                logger.log(ID, "Finished", "Duration: " + durationMinutes + " min. and " + durationSeconds + " sec.",
-                        MessageType.INFO);
+                logger.logInfo(ID, "End execution",
+                        "Duration: " + durationMinutes + " min. and " + durationSeconds + " sec.");
             }
         } else {
-            logger.log(ID, "Wrong number of arguments", ARGUMENTS_DESCRIPTION, MessageType.ERROR);
+            logger.logError(ID, "Wrong number of arguments", ARGUMENTS_DESCRIPTION);
         }
     }
 

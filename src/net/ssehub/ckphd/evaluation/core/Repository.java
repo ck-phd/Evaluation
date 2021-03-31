@@ -19,13 +19,12 @@ import java.io.File;
 import net.ssehub.ckphd.evaluation.utilities.ArchiveUtilities;
 import net.ssehub.ckphd.evaluation.utilities.ArchiveUtilitiesException;
 import net.ssehub.ckphd.evaluation.utilities.FileUtilities;
+import net.ssehub.ckphd.evaluation.utilities.FileUtilities.WriteOption;
 import net.ssehub.ckphd.evaluation.utilities.FileUtilitiesException;
 import net.ssehub.ckphd.evaluation.utilities.Logger;
-import net.ssehub.ckphd.evaluation.utilities.Logger.MessageType;
 import net.ssehub.ckphd.evaluation.utilities.ProcessUtilities;
 import net.ssehub.ckphd.evaluation.utilities.ProcessUtilities.ExecutionResult;
 import net.ssehub.ckphd.evaluation.utilities.ProcessUtilitiesException;
-import net.ssehub.ckphd.evaluation.utilities.FileUtilities.WriteOption;
 
 /**
  * This class represents a software repository.
@@ -75,7 +74,7 @@ public class Repository {
     /**
      * The reference to the global {@link Logger}.
      */
-    private Logger logger = Logger.getInstance();
+    private Logger logger = Logger.INSTANCE;
     
     /**
      * The reference to the global {@link ProcessUtilities}.
@@ -116,8 +115,8 @@ public class Repository {
         } else if (!archiveFile.getName().endsWith(".zip")) {
             throw new SetupException("The archive file \"" + archiveFile.getAbsolutePath() + "\" is not a zip archive");
         } else {
-            logger.log(ID, "Setting up the repository", "Repository archive file: \"" + archiveFile.getAbsolutePath()
-                    + "\"", MessageType.INFO);
+            logger.logDebug(ID, "Setting up repository",
+                    "Repository archive file: \"" + archiveFile.getAbsolutePath());
             try {
                 repositoryDirectory = ArchiveUtilities.getInstance().extract(archiveFile);
             } catch (ArchiveUtilitiesException e) {
@@ -143,8 +142,8 @@ public class Repository {
         } else {
             String preCommitHookFilePath = repositoryDirectory.getAbsolutePath() + GIT_HOOKS_DIRECTORY_RELATIVE_PATH;
             String preCommitHookContent = SHEBANG + System.lineSeparator() + hookActions;
-            logger.log(ID, "Adding pre-commmit hook \"" + preCommitHookFilePath + "\"", "Content:"
-                    + System.lineSeparator() + preCommitHookContent, MessageType.INFO);
+            logger.logDebug(ID, "Adding pre-commmit hook \"" + preCommitHookFilePath + "\"",
+                    "Content:" + System.lineSeparator() + preCommitHookContent);
             try {
                 FileUtilities.getInstance().writeFile(preCommitHookFilePath, GIT_PRE_COMMIT_HOOK_FILE_NAME,
                         preCommitHookContent, WriteOption.CREATE);
@@ -176,8 +175,8 @@ public class Repository {
             ExecutionResult commandResult;
             // First, apply the changes in the commit file to the files in the repository
             command = processUtilities.extendCommand(GIT_APPLY_COMMAND_PART, commitFile.getAbsolutePath());
-            logger.log(ID, "Applying changes from \"" + commitFile.getAbsolutePath() + "\"",
-                    "Command: " + processUtilities.getCommandString(command), MessageType.INFO);
+            logger.logDebug(ID, "Applying changes from \"" + commitFile.getAbsolutePath() + "\"",
+                    "Command: " + processUtilities.getCommandString(command));
             try {
                 commandResult = processUtilities.executeCommand(command, repositoryDirectory);
                 if (!commandResult.executionSuccessful()) {
@@ -190,8 +189,8 @@ public class Repository {
             }
             // Second, add the changes to the next commit
             command = GIT_ADD_COMMAND;
-            logger.log(ID, "Adding changes to next commit", "Command: " + processUtilities.getCommandString(command),
-                    MessageType.INFO);
+            logger.logDebug(ID, "Adding changes for committing",
+                    "Command: " + processUtilities.getCommandString(command));
             try {
                 commandResult = processUtilities.executeCommand(command, repositoryDirectory);
                 if (!commandResult.executionSuccessful()) {
@@ -203,8 +202,8 @@ public class Repository {
             }
             // Third, commit the changes to the repository
             command = processUtilities.extendCommand(GIT_COMMIT_COMMAND_PART, commitFile.getName());
-            logger.log(ID, "Committing changes to repository", "Command: " + processUtilities.getCommandString(command),
-                    MessageType.INFO);
+            logger.logDebug(ID, "Committing changes to repository",
+                    "Command: " + processUtilities.getCommandString(command));
             try {
                 commandResult = processUtilities.executeCommand(command, repositoryDirectory);
                 if (!commandResult.executionSuccessful()) {
@@ -246,8 +245,7 @@ public class Repository {
             for (int i = 0; i < nestedFiles.length; i++) {
                 deletionSuccessful = delete(nestedFiles[i]);
                 if (!deletionSuccessful) {
-                    logger.log(ID, "Deleting \"" + nestedFiles[i].getAbsolutePath() + "\" failed", null,
-                            MessageType.ERROR);
+                    logger.logError(ID, "Deleting \"" + nestedFiles[i].getAbsolutePath() + "\" failed");
                 }
             }
         }

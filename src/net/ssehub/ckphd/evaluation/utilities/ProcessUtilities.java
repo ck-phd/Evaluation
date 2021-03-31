@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import net.ssehub.ckphd.evaluation.utilities.Logger.MessageType;
-
 /**
  * This class provides utility methods for executing commands as external {@link Process} and returning corresponding
  * {@link ExecutionResult}s.
@@ -44,7 +42,7 @@ public class ProcessUtilities {
     /**
      * The reference to the global {@link Logger}.
      */
-    private Logger logger = Logger.getInstance();
+    private Logger logger = Logger.INSTANCE;
     
     /**
      * Constructs a new {@link ProcessUtilities} instance.
@@ -270,8 +268,8 @@ public class ProcessUtilities {
         InputStream errorStream = null;
         ProcessBuilder processBuilder = new ProcessBuilder(command);
         processBuilder = processBuilder.directory(workingDirectory);
-        logger.log(ID, "Executing command \"" + commandString + "\"", "Working directory: "
-                + workingDirectory.getAbsolutePath(), MessageType.INFO);
+        logger.logDebug(ID, "Executing command \"" + commandString + "\"", "Working directory: "
+                + workingDirectory.getAbsolutePath());
         try {
             process = processBuilder.start();
             // Read the standard output and save it to the result
