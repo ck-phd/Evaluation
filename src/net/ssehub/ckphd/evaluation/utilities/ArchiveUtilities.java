@@ -69,11 +69,13 @@ public class ArchiveUtilities {
      * 
      * @param archiveFile the {@link File} denoting the archive from which the entries shall be extracted; should never
      *        be <code>null</code>, must <i>exist</i>, and must be an <i>archive</i>
+     * @param destinationDirectory the {@link File} denoting the directory to which the entries shell be extracted;
+     *        should never be <code>null</code>, must <i>exist</i>, and must be a <i>directory</i>
      * @return the {@link File} denoting the root or first entry in the given archive or <code>null</code>, if the
      *         extraction fails
      * @throws ArchiveUtilitiesException if opening the given archive file, reading or writing the entries fails
      */
-    public File extract(File archiveFile) throws ArchiveUtilitiesException {
+    public File extract(File archiveFile, File destinationDirectory) throws ArchiveUtilitiesException {
         File extractedRootElement = null;
         FileInputStream fileInputStream = null;
         ZipInputStream zipInputStream = null;
@@ -84,7 +86,7 @@ public class ArchiveUtilities {
             ZipEntry zipEntry = rootZipEntry;
             logger.logDebug(ID, "Extracting entries from archive file \"" + archiveFile.getAbsolutePath() + "\"");
             do {
-                extract(zipEntry, zipInputStream, archiveFile.getParentFile());
+                extract(zipEntry, zipInputStream, destinationDirectory);
                 zipEntry = zipInputStream.getNextEntry();
             } while (zipEntry != null);            
             extractedRootElement = new File(archiveFile.getParentFile(), rootZipEntry.getName());

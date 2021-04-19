@@ -18,8 +18,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,6 +81,71 @@ public class FileUtilities {
     }
     
     /**
+     * Creates a new {@link File} object denoting a directory based on the given path. If the directory does not exist,
+     * this methods creates it including all non-existing parent directories on its path.
+     *  
+     * @param path the {@link String} denoting the path to the directory
+     * @return the respective file object
+     * @throws FileUtilitiesException if the given path is either <code>null</code> or empty, if the paths do not denote
+     *         a directory, if the directory already exists, or creating the directory fails
+     */
+    public File createDirectory(String path) throws FileUtilitiesException {
+        File directory = getFileObject(path);
+        createDirectory(directory);
+        return directory;
+    }
+    
+    /**
+     * Creates a new {@link File} object denoting a directory based on the given parent and child paths. If the
+     * directory does not exist, this methods creates it including all non-existing parent directories on its path.
+     *  
+     * @param parent the {@link String} denoting the parent path to the directory
+     * @param child the {@link String} defining the child path to or the name of the new directory
+     * @return the respective file object
+     * @throws FileUtilitiesException if the given parent or child paths are either <code>null</code> or empty, if the
+     *         paths do not denote a directory, if the directory already exists, or creating the directory fails
+     */
+    public File createDirectory(String parent, String child) throws FileUtilitiesException {
+        File directory = getFileObject(parent, child);
+        createDirectory(directory);
+        return directory;
+    }
+    
+    /**
+     * Creates all directories on the path of the given {@link File}. If the directories already exist, no further
+     * actions are performed.
+     *
+     * @param directory the {@link File} denoting a directory to create
+     * @throws FileUtilitiesException if the given {@link File} is <code>null</code>, does not denote a directory, or
+     *         creating the directories fails
+     */
+    private void createDirectory(File directory) throws FileUtilitiesException {
+        if (directory == null) {
+            throw new FileUtilitiesException("Creating new directory denied: file is \"null\"");
+        }
+        if (!directory.exists()) {            
+            try {
+                Files.createDirectories(directory.toPath());
+            } catch (UnsupportedOperationException e) {
+                throw new FileUtilitiesException("Creating new directory \"" + directory.getAbsolutePath()
+                        + "\" failed: path malformed", e);
+            } catch (FileAlreadyExistsException e) {
+                throw new FileUtilitiesException("Creating new directory \"" + directory.getAbsolutePath()
+                        + "\" failed: directory already exists", e);
+            } catch (SecurityException e) {
+                throw new FileUtilitiesException("Creating new directory \"" + directory.getAbsolutePath()
+                        + "\" failed: security manager denies checking directory", e);
+            } catch (IOException e) {
+                throw new FileUtilitiesException("Creating new directory \"" + directory.getAbsolutePath()
+                        + "\" failed", e);
+            }
+        } else {
+            logger.logWarning(ID, "Directory to create already exists: no further actions", "Directory: \"" 
+                    + directory.getAbsolutePath() + "\"");
+        }
+    }
+    
+    /**
      * Writes the given content to the file specified by the given path and file name. Depending on the given
      * {@link WriteOption}, this method creates a new file, overwrites an existing file, or appends the given content to
      * the end of an existing file.
@@ -95,7 +160,7 @@ public class FileUtilities {
             throws FileUtilitiesException {
         logger.logDebug(ID, "Writing file", "Path: \"" + path + "\"", "Name: \"" + fileName + "\"", "Option: "
                 + writeOption.name());
-        File file = createFileObject(path, fileName);
+        File file = getFileObject(path, fileName);
         switch(writeOption) {
         case CREATE:
             writeFile(file, fileContent);
@@ -127,17 +192,14 @@ public class FileUtilities {
                     + "\" denied as the file already exists");
         }
         // Create parent directories, if they do not exist
-        Path parentDirectory = file.toPath().getParent();
-        try {
-            if (!Files.exists(parentDirectory)) {
-                Files.createDirectories(parentDirectory);
+        File parentDirectory = file.getParentFile();
+        if (parentDirectory != null) {
+            try {                
+                createDirectory(parentDirectory);
+            } catch (FileUtilitiesException e) {
+                throw new FileUtilitiesException("Creating parent directories for new file \"" + file.getAbsolutePath()
+                        + "\" failed", e);
             }
-        } catch (SecurityException e) {
-            throw new FileUtilitiesException("Security manager denies checking parent directories of new file \""
-                    + file.getAbsolutePath() + "\"", e);
-        } catch (IOException e) {
-            throw new FileUtilitiesException("Creating parent directories for new file \""
-                    + file.getAbsolutePath() + "\" failed", e);
         }
         // Create and write file
         try {
@@ -242,24 +304,142 @@ public class FileUtilities {
     }
     
     /**
-     * Creates a new {@link File} based on the given path and file name.
+     * Creates a new {@link File} object based on the given path.
      * 
-     * @param path the {@link String} denoting the path to the file that shall be created
-     * @param fileName the {@link String} defining the name of the file that shall be created
-     * @return a new {@link File} with the given path and file name
-     * @throws FileUtilitiesException if the given path or file name is empty
+     * @param path the {@link String} denoting absolute path to the file
+     * @return the respective file object
+     * @throws FileUtilitiesException if the given path is either <code>null</code> or empty
      */
-    private File createFileObject(String path, String fileName) throws FileUtilitiesException {
-        File file = null;
-        if (path != null && !path.isEmpty()) {
-            if (fileName != null && !fileName.isEmpty()) {
-                file = new File(path, fileName);
-            } else {
-                throw new FileUtilitiesException("Creating file failed as the given file name is empty");
-            }
-        } else {
-            throw new FileUtilitiesException("Creating file failed as the given file path is empty");
+    public File getFileObject(String path) throws FileUtilitiesException {
+        if (path == null) {
+            throw new FileUtilitiesException("No file object for path \"null\"");
+        }
+        if (path.isBlank()) {
+            throw new FileUtilitiesException("No file object for empty path");
+        }
+        return new File(path);
+    }
+    
+    /**
+     * Creates a new {@link File} object based on the given parent and child paths.
+     * 
+     * @param parent the {@link String} denoting the parent path to the file
+     * @param child the {@link String} defining the child path to or the name of the file
+     * @return the respective file object
+     * @throws FileUtilitiesException if the given parent or child paths are either <code>null</code> or empty
+     */
+    public File getFileObject(String parent, String child) throws FileUtilitiesException {
+        if (parent == null) {
+            throw new FileUtilitiesException("No file object for parent path \"null\"");
+        }
+        if (parent.isBlank()) {
+            throw new FileUtilitiesException("No file object for empty parent path");
+        }
+        if (child == null) {
+            throw new FileUtilitiesException("No file object for child path \"null\"");
+        }
+        if (child.isBlank()) {
+            throw new FileUtilitiesException("No file object for empty child path");
+        }
+        return new File(parent, child);
+    }
+    
+    /**
+     * Creates a new {@link File} object based on the given path. Further, the file represented by this object is
+     * checked for existence and whether it is a file or a directory as indicated by the <code>isDirectory</code>
+     * parameter. 
+     * 
+     * @param path the {@link String} denoting absolute path to the file
+     * @param isDirectory <code>true</code>, if the path denotes a directory, or <code>false</code>, if the path denotes
+     *        a file
+     * @return the respective file object
+     * @throws FileUtilitiesException if the given path is either <code>null</code> or empty, if the file does not
+     *         exist, or, if the file is not a file or a directory as indicated by <code>isDirectory</code>
+     */
+    public File getCheckedFileObject(String path, boolean isDirectory) throws FileUtilitiesException {
+        return getCheckedFileObject(getFileObject(path), isDirectory);
+    }
+    
+    /**
+     * Creates a new {@link File} object based on the given parent and child paths. Further, the file represented by
+     * this object is checked for existence and whether it is a file or a directory as indicated by the
+     * <code>isDirectory</code> parameter.
+     * 
+     * @param parent the {@link String} denoting the parent path to the file
+     * @param child the {@link String} defining the child path to or the name of the file
+     * @param isDirectory <code>true</code>, if the paths denote a directory, or <code>false</code>, if the paths denote
+     *        a file
+     * @return the respective file object
+     * @throws FileUtilitiesException if the given parent or child paths are either <code>null</code> or empty, if the
+     *         file does not exist, or, if the file is not a file or a directory as indicated by
+     *         <code>isDirectory</code>
+     */
+    public File getCheckedFileObject(String parent, String child, boolean isDirectory) throws FileUtilitiesException {
+        return getCheckedFileObject(getFileObject(parent, child), isDirectory);
+    }
+    
+    /**
+     * Checks the given {@link File} for existence and whether it is a file or a directory as indicated by the
+     * <code>isDirectory</code> parameter. If the file passes all checks, this method will return the same file object.
+     * If any check fails, this method throws an exception.
+     * 
+     * @param file the {@link File} to check; must not be <code>null</code>
+     * @param isDirectory <code>true</code>, if the file denotes a directory, or <code>false</code>, if the file denotes
+     *        a file
+     * @return the given {@link File}
+     * @throws FileUtilitiesException if the file does not exist, or, if the file is not a file or a directory as
+     *         indicated by <code>isDirectory</code> 
+     */
+    private File getCheckedFileObject(File file, boolean isDirectory) throws FileUtilitiesException {
+        if (!file.exists()) {
+            throw new FileUtilitiesException("File \"" + file.getAbsolutePath() + "\" does not exist");
+        }
+        if (isDirectory && !file.isDirectory()) {
+            throw new FileUtilitiesException("File \"" + file.getAbsolutePath() + "\" is not a directory");
+        }
+        if (!isDirectory && !file.isFile()) {
+            throw new FileUtilitiesException("File \"" + file.getAbsolutePath() + "\" is not a file");
         }
         return file;
+    }
+    
+    /**
+     * Deletes the given {@link File}. If the given file is a directory, this method deletes all its content as well as
+     * the directory itself.
+     * 
+     * @param file the {@link File} to delete
+     * @throws FileUtilitiesException if the given file is <code>null</code>, does not exist, or deleting the file fails
+     */
+    public void delete(File file) throws FileUtilitiesException {
+        if (file == null) {
+            throw new FileUtilitiesException("Deleting file failed: file is \"null\"");
+        }
+        if (!file.exists()) {
+            throw new FileUtilitiesException("Deleting file \"" + file.getAbsolutePath() 
+                    + " failed: file does not exist");
+        }
+        deleteUnchecked(file);
+    }
+    
+    /**
+     * Deletes the given {@link File} without any previous checks, like being <code>null</code> or existence. If the
+     * given file is a directory, this method deletes all its content as well as the directory itself.
+     * 
+     * @param file the {@link File} to delete
+     * @throws FileUtilitiesException if deleting the file fails
+     */
+    private void deleteUnchecked(File file) throws FileUtilitiesException {
+        if (file.isDirectory()) {
+            File[] nestedFiles = file.listFiles();
+            for (int i = 0; i < nestedFiles.length; i++) {
+                deleteUnchecked(nestedFiles[i]);
+            }
+        }
+        try {
+            Files.delete(file.toPath());
+        } catch (IOException | SecurityException e) {
+            throw new FileUtilitiesException("Deleting file \"" + file.getAbsolutePath() 
+                    + " failed", e);
+        }
     }
 }
